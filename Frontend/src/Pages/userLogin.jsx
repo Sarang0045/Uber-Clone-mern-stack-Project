@@ -23,7 +23,8 @@ const UserLogin = () => {
           const data = response.data;
           console.log("User logged in successfully:", data);
           setUser(data.user);
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("userToken", data.token);
+          localStorage.removeItem("captainToken"); // Ensure only one is logged in
           navigate("/home");
         } else {
           console.error("Failed to login:", response.statusText);

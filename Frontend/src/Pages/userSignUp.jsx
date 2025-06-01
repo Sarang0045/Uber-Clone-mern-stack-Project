@@ -29,7 +29,8 @@ const UserSignup = () => {
           console.log("User created successfully:", data);
           console.log(data.user);
           setUser(data.user);
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("userToken", data.token);
+          localStorage.removeItem("captainToken"); // Ensure only one is logged in
           navigate("/home");
         }
       })

@@ -16,11 +16,11 @@ const CaptainLogout = () => {
         },
       })
       .then((response) => {
-        localStorage.removeItem("token");
+        localStorage.removeItem("captainToken");
         navigate("/login");
       })
       .catch((error) => {
-        localStorage.removeItem("token");
+        localStorage.removeItem("captainToken");
         navigate("/login");
       });
   }, [navigate, token]);

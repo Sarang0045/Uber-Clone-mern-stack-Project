@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const UserProtectedWaper = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const userToken = localStorage.getItem("userToken");
+  const captainToken = localStorage.getItem("captainToken");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
-      console.log("User is not logged in or user data is not available.");
+    if (!userToken || captainToken) {
+      // If not logged in as user or logged in as captain, redirect
       navigate("/login");
     }
-  }, [token, navigate]);
+  }, [userToken, captainToken, navigate]);
 
   return <>{children}</>;
 };

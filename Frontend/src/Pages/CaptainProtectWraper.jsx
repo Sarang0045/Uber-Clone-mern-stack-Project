@@ -2,14 +2,16 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CaptainProtectWraper = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const captainToken = localStorage.getItem("captainToken");
+  const userToken = localStorage.getItem("userToken");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
+    if (!captainToken || userToken) {
+      // If not logged in as captain or logged in as user, redirect
       navigate("/login");
     }
-  }, [token, navigate]);
+  }, [captainToken, userToken, navigate]);
 
   return <>{children}</>;
 };

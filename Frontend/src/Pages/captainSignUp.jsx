@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../Context/CaptainContext";
 import axios from "axios";
 
@@ -34,15 +34,19 @@ const CaptainSignup = () => {
       },
     };
 
-    axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, CaptainData)
+    axios
+      .post(`${import.meta.env.VITE_BASE_URL}/captains/register`, CaptainData)
       .then((response) => {
         if (response.status === 201) {
           setCaptain(response.data.captain);
-          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("captainToken", response.data.token);
+          localStorage.removeItem("userToken"); // Ensure only one is logged in
           console.log("Signup successful! You can now login.");
           navigate("/captain-home");
         } else {
-          console.log("Signup failed: " + (response.data.message || "Unknown error"));
+          console.log(
+            "Signup failed: " + (response.data.message || "Unknown error")
+          );
         }
       })
       .catch((error) => {
