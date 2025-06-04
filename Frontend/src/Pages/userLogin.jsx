@@ -1,37 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "../Context/UserContext";
-import { useContext } from "react";
+
+// Configure axios instance
+const API = axios.create({
+  baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:5000",
+  withCredentials: true,
+  timeout: 10000,
+});
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useContext(UserDataContext) || {};
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    const userData = {
-      email: email,
-      password: password,
-    };
-    axios
-      .post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
-      .then((response) => {
-        if (response.status === 200) {
-          const data = response.data;
-          console.log("User logged in successfully:", data);
-          setUser(data.user);
-          localStorage.setItem("userToken", data.token);
-          localStorage.removeItem("captainToken"); // Ensure only one is logged in
-          navigate("/home");
-        } else {
-          console.error("Failed to login:", response.statusText);
-        }
-      });
-    setEmail("");
-    setPassword("");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const { data } = await API.post("/users/login", { email, password });
+      
+      setUser(data.user);
+      localStorage.setItem("userToken", data.token);
+      localStorage.removeItem("captainToken");
+      navigate("/home");
+      
+    } catch (err) {
+      handleLoginError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoginError = (err) => {
+    if (err.response) {
+      setError(err.response.data.message || "Login failed");
+    } else if (err.code === "ERR_NETWORK") {
+      setError("Network error. Please check your connection");
+    } else if (err.code === "ECONNABORTED") {
+      setError("Request timeout. Please try again");
+    } else {
+      setError("An unexpected error occurred");
+    }
   };
 
   return (
@@ -40,41 +56,45 @@ const UserLogin = () => {
         <img
           className="w-16 mb-10"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYQy-OIkA6In0fTvVwZADPmFFibjmszu2A0g&s"
-          alt=""
+          alt="Uber Logo"
         />
 
-        <form
-          onSubmit={(e) => {
-            submitHandler(e);
-          }}
-        >
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={submitHandler}>
           <h3 className="text-lg font-medium mb-2">What's your email</h3>
           <input
             required
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
+            onChange={(e) => setEmail(e.target.value)}
             className="bg-[#eeeeee] mb-7 rounded-lg px-4 py-2 border w-full text-lg placeholder:text-base"
             type="email"
             placeholder="email@example.com"
+            disabled={isLoading}
           />
 
           <h3 className="text-lg font-medium mb-2">Enter Password</h3>
-
           <input
             className="bg-[#eeeeee] mb-7 rounded-lg px-4 py-2 border w-full text-lg placeholder:text-base"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
+            onChange={(e) => setPassword(e.target.value)}
             required
             type="password"
             placeholder="password"
+            disabled={isLoading}
           />
 
-          <button className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base">
-            Login
+          <button
+            disabled={isLoading}
+            className={`bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg ${
+              isLoading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+          >
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
         <p className="text-center">
@@ -87,7 +107,7 @@ const UserLogin = () => {
       <div>
         <Link
           to="/captain-login"
-          className="bg-[#10b461] flex items-center justify-center text-white font-semibold mb-5 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base"
+          className="bg-[#10b461] flex items-center justify-center text-white font-semibold mb-5 rounded-lg px-4 py-2 w-full text-lg"
         >
           Sign in as Captain
         </Link>
