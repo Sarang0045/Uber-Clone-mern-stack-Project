@@ -6,6 +6,7 @@ import VehiclePanel from "../Components/VehiclePanel";
 import ComfirmedRide from "../Components/ConfirmedRide";
 import LookingForDriver from "../Components/LookingForDrivers";
 import WaitingForDriver from "../Components/WaitingForDriver";
+import axios from "axios";
 
 const Home = () => {
   const [pick, setPick] = useState("");
@@ -21,6 +22,8 @@ const Home = () => {
   const [vehicleFound, setVehicleFound] = useState(false);
   const waitingForDriverRef = useRef(null);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
+  const [activeField, setActiveField] = useState(null); // "pickup" or "destination"
+  const [suggestions, setSuggestions] = useState([]);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -93,6 +96,22 @@ const Home = () => {
     }
   }, [waitingForDriver]);
 
+  // Fetch suggestions from backend
+  const fetchSuggestions = async (query) => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions?query=${encodeURIComponent(query)}`
+      );
+      setSuggestions(res.data.suggestions || []);
+    } catch (err) {
+      setSuggestions([]);
+    }
+  };
+
   return (
     <div className="h-screen relative overflow-hidden">
       <img
@@ -128,17 +147,35 @@ const Home = () => {
               className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full mt-5"
               type="text"
               placeholder="Add a PickUp Location"
-              onClick={() => setPanel(true)}
+              onClick={() => {
+                setPanel(true);
+                setActiveField("pickup");
+                fetchSuggestions(pick);
+              }}
               value={pick}
-              onChange={(e) => setPick(e.target.value)}
+              onChange={(e) => {
+                setPick(e.target.value);
+                setActiveField("pickup");
+                fetchSuggestions(e.target.value);
+              }}
+              autoComplete="off"
             />
             <input
               className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full mt-3"
               type="text"
               placeholder="Enter Your Destination"
-              onClick={() => setPanel(true)}
+              onClick={() => {
+                setPanel(true);
+                setActiveField("destination");
+                fetchSuggestions(dest);
+              }}
               value={dest}
-              onChange={(e) => setDest(e.target.value)}
+              onChange={(e) => {
+                setDest(e.target.value);
+                setActiveField("destination");
+                fetchSuggestions(e.target.value);
+              }}
+              autoComplete="off"
             />
           </form>
         </div>
@@ -149,6 +186,13 @@ const Home = () => {
             panel={panel}
             Vehiclespanel={Vehiclespanel}
             setVehiclespanel={setVehiclespanel}
+            suggestions={suggestions}
+            onSuggestionClick={(suggestion) => {
+              if (activeField === "pickup") setPick(suggestion);
+              else if (activeField === "destination") setDest(suggestion);
+              setPanel(false);
+              setSuggestions([]);
+            }}
           />
         </div>
       </div>
