@@ -1,19 +1,5 @@
 const axios = require("axios");
 
-// Helper function to format duration
-function formatDuration(seconds) {
-  const days = Math.floor(seconds / (3600 * 24));
-  const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  let result = [];
-  if (days > 0) result.push(`${days} day${days > 1 ? "s" : ""}`);
-  if (hours > 0) result.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-  if (minutes > 0) result.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
-
-  return result.join(" ") || "0 mins";
-}
-
 module.exports.getAddressCoordinates = async (address) => {
   try {
     // Better address normalization

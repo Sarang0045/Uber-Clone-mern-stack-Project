@@ -1,122 +1,89 @@
-const Ride = require("../models/rideModel");
+const rideModel = require("../models/rideModel");
 const mapService = require("./mapServices");
 const crypto = require("crypto");
 
-// Fare calculation constants
-const FARE_CONFIG = {
-  auto: { base: 30, perKm: 10, perMin: 2 },
-  car: { base: 50, perKm: 15, perMin: 3 },
-  moto: { base: 20, perKm: 8, perMin: 1.5 }
-};
-
-// Generate OTP
-function generateOTP(length = 6) {
-  return crypto.randomInt(10**(length-1), 10**length).toString();
-}
-
-// Validate coordinates
-function isValidCoordinates(coords) {
-  return (
-    coords && 
-    typeof coords.lat === 'number' && 
-    typeof coords.lon === 'number' &&
-    !isNaN(coords.lat) &&
-    !isNaN(coords.lon)
-  );
-}
-
-// Get coordinates for an address
-async function getCoordinatesForAddress(address) {
-  try {
-    return await mapService.getAddressCoordinates(address);
-  } catch (error) {
-    throw new Error(`Failed to get coordinates for address: ${address}`);
+async function getFare(pickup, destination) {
+  if (!pickup || !destination) {
+    throw new Error("Pickup and destination are required");
   }
+
+  const distanceTime = await mapService.getDistanceTime(pickup, destination);
+
+  const baseFare = {
+    auto: 50,
+    car: 70,
+    moto: 40,
+  };
+
+  const perKmRate = {
+    auto: 20,
+    car: 45,
+    moto: 10,
+  };
+
+  const perMinuteRate = {
+    auto: 4,
+    car: 5,
+    moto: 2,
+  };
+
+  const fare = {
+    auto: Math.round(
+      baseFare.auto +
+        (distanceTime.distance.value / 1000) * perKmRate.auto +
+        (distanceTime.duration.value / 60) * perMinuteRate.auto
+    ),
+    car: Math.round(
+      baseFare.car +
+        (distanceTime.distance.value / 1000) * perKmRate.car +
+        (distanceTime.duration.value / 60) * perMinuteRate.car
+    ),
+    moto: Math.round(
+      baseFare.moto +
+        (distanceTime.distance.value / 1000) * perKmRate.moto +
+        (distanceTime.duration.value / 60) * perMinuteRate.moto
+    ),
+  };
+
+  return { fare, distanceTime };
 }
 
-// Calculate fare based on distance and time
-function calculateFare(vehicleType, distance, duration) {
-  const config = FARE_CONFIG[vehicleType];
-  if (!config) throw new Error(`Invalid vehicle type: ${vehicleType}`);
-  
-  return (
-    config.base +
-    (distance * config.perKm) +
-    (duration * config.perMin)
-  );
+function getOtp(num) {
+  function generateOtp(num) {
+    const otp = crypto
+      .randomInt(Math.pow(10, num - 1), Math.pow(10, num))
+      .toString();
+    return otp;
+  }
+  return generateOtp(num);
 }
 
-// Create a new ride
-module.exports.createRide = async (user, pickup, destination, vehicleType) => {
-  // Validate inputs
+module.exports.createRide = async ({
+  user,
+  pickup,
+  destination,
+  vehicleType,
+}) => {
   if (!user || !pickup || !destination || !vehicleType) {
-    throw new Error("All fields are required");
-  }
-
-  try {
-    // Get coordinates for pickup and destination
-    const [pickupCoords, destCoords] = await Promise.all([
-      getCoordinatesForAddress(pickup),
-      getCoordinatesForAddress(destination)
-    ]);
-
-    // Validate coordinates
-    if (!isValidCoordinates(pickupCoords) || !isValidCoordinates(destCoords)) {
-      throw new Error("Invalid coordinates for addresses");
-    }
-
-    // Get distance and time
-    const distanceTime = await mapService.getDistanceTime(pickupCoords, destCoords);
-    
-    // Calculate fare
-    const fare = calculateFare(
-      vehicleType,
-      distanceTime.distance.value, // in km
-      distanceTime.duration.value  // in minutes
+    throw new Error(
+      `All fields are required. Received: user=${user}, pickup=${pickup}, destination=${destination}, vehicleType=${vehicleType}`
     );
-
-    // Create ride document
-    const ride = await Ride.create({
-      user,
-      vehicleType,
-      otp: generateOTP(6),
-      fare: Math.round(fare),
-      pickup: {
-        address: pickup,
-        coordinates: pickupCoords
-      },
-      destination: {
-        address: destination,
-        coordinates: destCoords
-      },
-      distance: {
-        value: distanceTime.distance.value,
-        text: distanceTime.distance.text
-      },
-      duration: {
-        value: distanceTime.duration.value,
-        text: distanceTime.duration.text
-      },
-      status: "pending"
-    });
-
-    // Return ride with user id and ride id
-    return {
-      _id: ride._id,
-      user: ride.user,
-      vehicleType: ride.vehicleType,
-      otp: ride.otp,
-      fare: ride.fare,
-      pickup: ride.pickup,
-      destination: ride.destination,
-      distance: ride.distance,
-      duration: ride.duration,
-      status: ride.status
-    };
-  } catch (error) {
-    console.error("Ride creation error:", error);
-    throw new Error(`Failed to create ride: ${error.message}`);
   }
+
+  const { fare, distanceTime } = await getFare(pickup, destination);
+  console.log("Fare calculated:", fare);
+
+  const ride = await rideModel.create({
+    user,
+    pickup, // store as string
+    destination, // store as string
+    otp: getOtp(6),
+    fare: fare[vehicleType],
+    distance: distanceTime.distance.value,
+    duration: distanceTime.duration.value,
+  });
+  console.log("Ride created:", ride);
+  return ride;
 };
 
-// Additional ride service functions can be added here
+module.exports.getFare = getFare;

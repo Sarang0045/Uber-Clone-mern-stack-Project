@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect } from "react";
+import { useRef, useState, useLayoutEffect, useEffect } from "react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
 import LocationSearchPanel from "../Components/LocationSearchPanel";
@@ -22,13 +22,20 @@ const Home = () => {
   const [vehicleFound, setVehicleFound] = useState(false);
   const waitingForDriverRef = useRef(null);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
-  const [activeField, setActiveField] = useState(null); // "pickup" or "destination"
+  const [activeField, setActiveField] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState(0);
+  const [fare, setFare] = useState(0);
 
   const submitHandler = (e) => {
     e.preventDefault();
+    if (pick && dest) {
+      setVehiclespanel(true);
+    }
   };
 
+  // Animation effects
   useLayoutEffect(() => {
     if (panel) {
       gsap.to(panelRef.current, {
@@ -96,21 +103,64 @@ const Home = () => {
     }
   }, [waitingForDriver]);
 
-  // Fetch suggestions from backend
+  // Fetch suggestions from backend with debounce
   const fetchSuggestions = async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.trim().length < 2) {
       setSuggestions([]);
       return;
     }
+
+    setIsLoading(true);
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions?query=${encodeURIComponent(query)}`
+        `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,
+        {
+          params: { input: query },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
       );
       setSuggestions(res.data.suggestions || []);
     } catch (err) {
+      console.error("Failed to fetch suggestions:", err);
       setSuggestions([]);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Handle input change with debounce
+  const handleInputChange = (field, value) => {
+    if (field === "pickup") {
+      setPick(value);
+      setActiveField("pickup");
+    } else {
+      setDest(value);
+      setActiveField("destination");
+    }
+
+    // Clear previous timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+
+    // Set new timeout
+    const timer = setTimeout(() => {
+      fetchSuggestions(value);
+    }, 300);
+
+    setTypingTimeout(timer);
+  };
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+    };
+  }, [typingTimeout]);
 
   return (
     <div className="h-screen relative overflow-hidden">
@@ -126,88 +176,125 @@ const Home = () => {
           alt="map with cars"
         />
       </div>
-      <div className="flex flex-col justify-end h-screen absolute top-0 w-full ">
+      <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
         <div className="h-[30%] bg-white p-5 relative">
           <h5
             onClick={() => {
               setPanel(false);
+              setSuggestions([]);
             }}
             ref={panelCloseRef}
-            className="absolute opacity-0 top-3 right-6 text-3xl"
+            className="absolute opacity-0 top-3 right-6 text-3xl cursor-pointer"
           >
-            <i className="ri-arrow-down-wide-line"></i>
+            <i className="ri-close-line"></i>
           </h5>
           <h4 className="text-2xl font-bold">Find a Trip</h4>
-          <form
-            onSubmit={(e) => {
-              submitHandler(e);
-            }}
-          >
-            <input
-              className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full mt-5"
-              type="text"
-              placeholder="Add a PickUp Location"
-              onClick={() => {
-                setPanel(true);
-                setActiveField("pickup");
-                fetchSuggestions(pick);
+          <form>
+            <div className="relative mt-5">
+              <i className="ri-map-pin-fill text-2xl absolute left-3 top-1 text-gray-500"></i>
+              <input
+                className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full"
+                type="text"
+                placeholder="Add a PickUp Location"
+                onClick={() => {
+                  setPanel(true);
+                  setActiveField("pickup");
+                  fetchSuggestions(pick);
+                }}
+                value={pick}
+                onChange={(e) => handleInputChange("pickup", e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <div className="relative mt-3">
+              <i className="ri-flag-fill text-2xl absolute left-3 top-1 text-gray-500"></i>
+              <input
+                className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full"
+                type="text"
+                placeholder="Enter Your Destination"
+                onClick={() => {
+                  setPanel(true);
+                  setActiveField("destination");
+                  fetchSuggestions(dest);
+                }}
+                value={dest}
+                onChange={(e) =>
+                  handleInputChange("destination", e.target.value)
+                }
+                autoComplete="off"
+              />
+            </div>
+            <button
+              className="border text-white font-semibold bg-gray-900 text-lg px-12 py-2 rounded-lg mt-5 w-full"
+              type="button"
+              onClick={async (e) => {
+                e.preventDefault();
+                if (pick && dest) {
+                  setPanel(false);
+                  setVehiclespanel(true);
+                  try {
+                    const response = await axios.post(
+                      `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
+                      {
+                        params: {
+                          pickup: pick,
+                          destination: dest,
+                          vehicleType: "auto",
+                        },
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+                        },
+                      }
+                    );
+                    console.log(response.data);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                } else {
+                  alert("Please enter both pickup and destination locations.");
+                }
               }}
-              value={pick}
-              onChange={(e) => {
-                setPick(e.target.value);
-                setActiveField("pickup");
-                fetchSuggestions(e.target.value);
-              }}
-              autoComplete="off"
-            />
-            <input
-              className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full mt-3"
-              type="text"
-              placeholder="Enter Your Destination"
-              onClick={() => {
-                setPanel(true);
-                setActiveField("destination");
-                fetchSuggestions(dest);
-              }}
-              value={dest}
-              onChange={(e) => {
-                setDest(e.target.value);
-                setActiveField("destination");
-                fetchSuggestions(e.target.value);
-              }}
-              autoComplete="off"
-            />
+            >
+              Find Trip
+            </button>
           </form>
         </div>
 
-        <div ref={panelRef} className="h-0 bg-white">
+        <div ref={panelRef} className="h-0 bg-white overflow-y-auto">
           <LocationSearchPanel
             setPanel={setPanel}
             panel={panel}
             Vehiclespanel={Vehiclespanel}
             setVehiclespanel={setVehiclespanel}
             suggestions={suggestions}
+            isLoading={isLoading}
             onSuggestionClick={(suggestion) => {
-              if (activeField === "pickup") setPick(suggestion);
-              else if (activeField === "destination") setDest(suggestion);
-              setPanel(false);
+              if (activeField === "pickup") {
+                setPick(suggestion.display_name);
+              } else if (activeField === "destination") {
+                setDest(suggestion.display_name);
+              }
               setSuggestions([]);
+              setPanel(false);
             }}
           />
         </div>
       </div>
+
       <div
         ref={vehiclepanelRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 "
+        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg"
       >
         <VehiclePanel
           setConfirmedRide={setConfirmedRide}
           setVehiclespanel={setVehiclespanel}
+          pickup={pick}
+          destination={dest}
         />
       </div>
       <div
         ref={confirmedRideRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 "
+        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg"
       >
         <ComfirmedRide
           setConfirmedRide={setConfirmedRide}
@@ -216,15 +303,15 @@ const Home = () => {
       </div>
       <div
         ref={vehicleFoundRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12"
+        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
       >
         <LookingForDriver setVehicleFound={setVehicleFound} />
       </div>
       <div
         ref={waitingForDriverRef}
-        className="fixed w-full z-10 bottom-0  bg-white px-3 py-6 pt-12"
+        className="fixed w-full z-10 bottom-0 bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
       >
-        <WaitingForDriver waitingForDriver={setWaitingForDriver} />
+        <WaitingForDriver setWaitingForDriver={setWaitingForDriver} />
       </div>
     </div>
   );
