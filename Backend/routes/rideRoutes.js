@@ -1,31 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
+const { body, query } = require('express-validator');
 const rideController = require('../controllers/rideController');
-const authenticateUser = require('../middlewares/OuthMiddleware');
+const authMiddleware = require('../middlewares/OuthMiddleware');
 
-// Ride creation endpoint
-router.post(
-  '/create',
-  authenticateUser.authenticateUser,
-  [
-    body('pickup')
-      .trim()
-      .isString()
-      .isLength({ min: 5 })
-      .withMessage('Pickup location must be at least 5 characters'),
-    body('destination')
-      .trim()
-      .isString()
-      .isLength({ min: 5 })
-      .withMessage('Destination must be at least 5 characters'),
-    body('vehicleType')
-      .isIn(['auto', 'car', 'moto'])
-      .withMessage('Invalid vehicle type')
-  ],
-  rideController.createRide
-);
 
-// Add other ride routes as needed
+router.post('/create',
+    authMiddleware.authenticateUser,
+    body('pickup').isString().isLength({ min: 3 }).withMessage('Invalid pickup address'),
+    body('destination').isString().isLength({ min: 3 }).withMessage('Invalid destination address'),
+    body('vehicleType').isString().isIn([ 'auto', 'car', 'moto' ]).withMessage('Invalid vehicle type'),
+    rideController.createRide
+)
+
+router.get('/get-fare',
+    authMiddleware.authenticateUser,
+    query('pickup').isString().isLength({ min: 3 }).withMessage('Invalid pickup address'),
+    query('destination').isString().isLength({ min: 3 }).withMessage('Invalid destination address'),
+    rideController.getFare
+)
+
 
 module.exports = router;
