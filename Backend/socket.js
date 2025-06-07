@@ -16,7 +16,6 @@ function initializeSocket(server) {
   io.on("connection", (socket) => {
     sockets.set(socket.id, socket);
     console.log(`Socket connected: ${socket.id}`);
-
     socket.on("join", async (data) => {
       const { userId, role } = data;
       if (role === "user") {
@@ -26,17 +25,38 @@ function initializeSocket(server) {
       }
     });
 
+    socket.on("update-location-captain", async (data) => {
+      const { userId, location } = data;
+      if (!userId || !location || !location.ltd || !location.lng) {
+        return socket.emit(error, "Invalid data provided for location update.");
+      }
+      try {
+        await captainModel.findByIdAndUpdate(userId, {
+          location: {
+            ltd: location.ltd,
+            lng: location.lng,
+          },
+        });
+      } catch (error) {
+        console.error("Error updating captain location:", error);
+      }
+    });
+
     socket.on("disconnect", () => {
       sockets.delete(socket.id);
     });
   });
 }
 
-function sendMessageToSocketId(socketId, event, data) {
-  if (io && sockets.has(socketId)) {
-    sockets.get(socketId).emit(event, data);
+const sendMessageToSocketId = (socketId, messageObject) => {
+  console.log(messageObject);
+
+  if (io) {
+    io.to(socketId).emit(messageObject.event, messageObject.data);
+  } else {
+    console.log("Socket.io not initialized.");
   }
-}
+};
 
 module.exports = {
   initializeSocket,

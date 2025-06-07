@@ -17,14 +17,36 @@ const CaptainHome = () => {
   const confirmRidePopupPanelRef = useRef(null);
 
   const { socket } = useContext(SocketContext);
-  const { caption } = useContext(CaptainDataContext);
+  const { captain } = useContext(CaptainDataContext);
 
   useEffect(() => {
+    console.log(captain);
     socket.emit("join", {
-      role : "captain",
-      userId: caption._id,
+      role: "captain",
+      userId: captain._id,
     });
-  },[])
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          socket.emit("update-location-captain", {
+            userId: captain._id,
+            location: {
+              ltd: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+        });
+      }
+    };
+
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation();
+    return () => clearInterval(locationInterval);
+  }, []);
+
+  socket.on("new-ride", (data) => {
+    console.log("New ride request received:", data);
+  });
 
   useGSAP(
     function () {

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const captainModel = require("../models/captainModel");
 
 module.exports.getAddressCoordinates = async (address) => {
   try {
@@ -55,7 +56,6 @@ module.exports.getAddressCoordinates = async (address) => {
         return {
           lat: parseFloat(lat),
           lon: parseFloat(lon),
-          display_name: fallbackResponse.data[0].display_name,
         };
       }
 
@@ -199,4 +199,15 @@ module.exports.cachedAutocomplete = async (query) => {
   setTimeout(() => autocompleteCache.delete(cacheKey), 60 * 60 * 1000);
 
   return results;
+};
+
+module.exports.getCaptainInTheRadius = async (lat, lng, radius) => {
+  const captains = await captainModel.find({
+    location: {
+      $geoWithin: {
+        $centerSphere: [[lat, lng], radius / 6371], // radius in radians
+      },
+    },
+  });
+  return captains;
 };

@@ -37,8 +37,9 @@ const Home = () => {
   const { user } = useContext(UserDataContext);
 
   useEffect(() => {
+    console.log(user);
     sendMessage("join", { role: "user", userId: user._id });
-  }, []);
+  }, [user]);
 
   useLayoutEffect(() => {
     if (panel) {
