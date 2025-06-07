@@ -20,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "maplibre-gl": "^5.5.0",
     "mongoose": "^8.15.1",
-    "react-map-gl": "^8.0.4"
+    "react-map-gl": "^8.0.4",
+    "socket.io": "^4.8.1"
   }
 }

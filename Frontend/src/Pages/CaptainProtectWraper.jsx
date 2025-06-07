@@ -1,19 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import {CaptainDataContext} from "../Context/CaptainDataContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const CaptainProtectWraper = ({ children }) => {
+const CaptainProtectWrapper = ({ children }) => {
   const captainToken = localStorage.getItem("captainToken");
-  const userToken = localStorage.getItem("userToken");
   const navigate = useNavigate();
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!captainToken || userToken) {
-      // If not logged in as captain or logged in as user, redirect
-      navigate("/login");
+    if (!captainToken) {
+      navigate("/captain-login");
     }
-  }, [captainToken, userToken, navigate]);
+
+    axios
+      .get(`${import.meta.env.VITE_BASE_URL}/captains/profile`, {
+        headers: {
+          Authorization: `Bearer ${captainToken}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setCaptain(response.data.captain);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        localStorage.removeItem("captainToken");
+        navigate("/captain-login");
+      });
+  }, [captainToken]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return <>{children}</>;
 };
 
-export default CaptainProtectWraper;
+export default CaptainProtectWrapper;

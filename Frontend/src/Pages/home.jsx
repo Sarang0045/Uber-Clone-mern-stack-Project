@@ -7,6 +7,9 @@ import ComfirmedRide from "../Components/ConfirmedRide";
 import LookingForDriver from "../Components/LookingForDrivers";
 import WaitingForDriver from "../Components/WaitingForDriver";
 import axios from "axios";
+import React, { useContext } from "react";
+import { SocketContext } from "../Context/SocketContext";
+import { UserDataContext } from "../Context/UserContext";
 
 const Home = () => {
   const [pick, setPick] = useState("");
@@ -29,6 +32,13 @@ const Home = () => {
   const [fare, setFare] = useState(0);
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleImg, setVehicleImg] = useState("");
+
+  const { sendMessage, onMessage } = useContext(SocketContext);
+  const { user } = useContext(UserDataContext);
+
+  useEffect(() => {
+    sendMessage("join", { role: "user", userId: user._id });
+  }, []);
 
   useLayoutEffect(() => {
     if (panel) {
