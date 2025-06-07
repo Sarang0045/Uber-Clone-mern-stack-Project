@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const UserLogout = () => {
   const navigate = useNavigate();
@@ -19,10 +20,12 @@ const UserLogout = () => {
       })
       .then((response) => {
         localStorage.removeItem("userToken");
+        toast.success("Logged out successfully!");
         navigate("/login");
       })
       .catch((error) => {
         localStorage.removeItem("userToken");
+        toast.success("Logged out successfully!");
         navigate("/login");
       });
   }, [navigate, token]);

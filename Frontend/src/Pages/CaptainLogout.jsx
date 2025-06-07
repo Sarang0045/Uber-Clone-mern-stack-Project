@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 const CaptainLogout = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -17,10 +18,12 @@ const CaptainLogout = () => {
       })
       .then((response) => {
         localStorage.removeItem("captainToken");
+        toast.success("Captain logged out successfully!");
         navigate("/login");
       })
       .catch((error) => {
         localStorage.removeItem("captainToken");
+        toast.success("Captain logged out successfully!");
         navigate("/login");
       });
   }, [navigate, token]);

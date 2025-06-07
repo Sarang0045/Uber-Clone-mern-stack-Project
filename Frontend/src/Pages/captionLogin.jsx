@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../Context/CaptainContext";
+import { toast } from "react-toastify";
 
 const Captainlogin = () => {
   const [email, setEmail] = useState("");
@@ -25,17 +26,19 @@ const Captainlogin = () => {
           setCaptain(data.captain);
           localStorage.setItem("captainToken", data.token);
           localStorage.removeItem("userToken"); // Ensure only one is logged in
+          toast.success("Captain login successful!");
           navigate("/captain-home");
         }
       })
       .catch((error) => {
+        toast.error("Captain login failed! Please check your credentials.");
         console.error("Error logging in captain:", error);
       });
     setEmail("");
     setPassword("");
   };
   return (
-    <div className="p-7 h-screen flex flex-col justify-between">
+    <div className="p-7 min-h-screen flex flex-col justify-between overflow-y-auto">
       <div>
         <img
           className="w-20 mb-3"

@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CaptainDataContext } from "../Context/CaptainContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const CaptainSignup = () => {
   const [email, setEmail] = useState("");
@@ -41,15 +42,18 @@ const CaptainSignup = () => {
           setCaptain(response.data.captain);
           localStorage.setItem("captainToken", response.data.token);
           localStorage.removeItem("userToken"); // Ensure only one is logged in
+          toast.success("Captain signup successful!");
           console.log("Signup successful! You can now login.");
           navigate("/captain-home");
         } else {
+          toast.error("Signup failed!");
           console.log(
             "Signup failed: " + (response.data.message || "Unknown error")
           );
         }
       })
       .catch((error) => {
+        toast.error("Signup failed! Please try again.");
         console.error("Error during signup:", error);
         console.log("An error occurred during signup. Please try again.");
       });
@@ -64,7 +68,7 @@ const CaptainSignup = () => {
     setVehicleType("");
   };
   return (
-    <div className="py-5 px-5 h-screen flex flex-col justify-between">
+    <div className="py-5 px-5 min-h-screen flex flex-col justify-between overflow-y-auto">
       <div>
         <img
           className="w-20 mb-3"

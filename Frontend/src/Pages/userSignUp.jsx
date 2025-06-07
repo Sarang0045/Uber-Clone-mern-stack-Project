@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "../Context/UserContext";
+import { toast } from "react-toastify";
 
 const UserSignup = () => {
   const [email, setEmail] = useState("");
@@ -31,10 +32,12 @@ const UserSignup = () => {
           setUser(data.user);
           localStorage.setItem("userToken", data.token);
           localStorage.removeItem("captainToken"); // Ensure only one is logged in
+          toast.success("Signup successful!");
           navigate("/home");
         }
       })
       .catch((error) => {
+        toast.error("Signup failed! Please try again.");
         console.error("Error creating user:", error);
       });
 
@@ -45,7 +48,7 @@ const UserSignup = () => {
   };
   return (
     <div>
-      <div className="p-7 h-screen flex flex-col justify-between">
+      <div className="p-7 min-h-screen flex flex-col justify-between overflow-y-auto">
         <div>
           <img
             className="w-16 mb-10"

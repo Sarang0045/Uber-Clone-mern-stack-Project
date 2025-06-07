@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "../Context/UserContext";
 import { useContext } from "react";
+import { toast } from "react-toastify";
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
@@ -25,17 +26,22 @@ const UserLogin = () => {
           setUser(data.user);
           localStorage.setItem("userToken", data.token);
           localStorage.removeItem("captainToken"); // Ensure only one is logged in
+          toast.success("Login successful!");
           navigate("/home");
         } else {
+          toast.error("Failed to login!");
           console.error("Failed to login:", response.statusText);
         }
+      })
+      .catch(() => {
+        toast.error("Login failed! Please check your credentials.");
       });
     setEmail("");
     setPassword("");
   };
 
   return (
-    <div className="p-7 h-screen flex flex-col justify-between">
+    <div className="p-7 min-h-screen flex flex-col justify-between overflow-y-auto">
       <div>
         <img
           className="w-16 mb-10"

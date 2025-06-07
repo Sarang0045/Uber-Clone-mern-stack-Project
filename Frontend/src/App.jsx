@@ -15,6 +15,8 @@ import CaptainHome from "./Pages/CaptainHome";
 import CaptainLogout from "./Pages/CaptainLogout";
 import Riding from "./Pages/Riding";
 import CaptainRiding from "./Pages/CaptainRiding";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   return (
@@ -62,6 +64,7 @@ const App = () => {
             />
             <Route path="/captain-riding" element={<CaptainRiding />} />
           </Routes>
+          <ToastContainer />
         </div>
       </UserContext>
     </CaptainContext>

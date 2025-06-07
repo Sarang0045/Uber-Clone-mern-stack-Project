@@ -76,7 +76,7 @@ const ConfirmRidePopUp = (props) => {
 
             <Link
               to="/captain-riding"
-              className="w-full mt-5 text-lg flex justify-center bg-green-600 text-white font-semibold p-3 rounded-lg"
+              className="w-full mt-5 text-lg flex justify-center bg-gray-900 text-white font-semibold p-3 rounded-lg"
             >
               Confirm
             </Link>

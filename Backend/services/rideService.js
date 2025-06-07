@@ -7,7 +7,25 @@ async function getFare(pickup, destination) {
     throw new Error("Pickup and destination are required");
   }
 
-  const distanceTime = await mapService.getDistanceTime(pickup, destination);
+  // Geocode addresses to coordinates
+  const pickupCoords = await mapService.getAddressCoordinates(pickup);
+  const destinationCoords = await mapService.getAddressCoordinates(destination);
+
+  if (
+    !pickupCoords ||
+    typeof pickupCoords.lat !== "number" ||
+    typeof pickupCoords.lon !== "number" ||
+    !destinationCoords ||
+    typeof destinationCoords.lat !== "number" ||
+    typeof destinationCoords.lon !== "number"
+  ) {
+    throw new Error("Invalid coordinates provided");
+  }
+
+  const distanceTime = await mapService.getDistanceTime(
+    pickupCoords,
+    destinationCoords
+  );
 
   const baseFare = {
     auto: 50,

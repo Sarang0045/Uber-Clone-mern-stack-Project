@@ -24,7 +24,7 @@ const CaptainRiding = () => {
   );
 
   return (
-    <div className="h-screen relative">
+    <div className="min-h-screen relative overflow-y-auto">
       <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
         <img
           className="w-16"

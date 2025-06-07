@@ -27,15 +27,9 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState(0);
   const [fare, setFare] = useState(0);
+  const [vehicleType, setVehicleType] = useState("");
+  const [vehicleImg, setVehicleImg] = useState("");
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-    if (pick && dest) {
-      setVehiclespanel(true);
-    }
-  };
-
-  // Animation effects
   useLayoutEffect(() => {
     if (panel) {
       gsap.to(panelRef.current, {
@@ -74,7 +68,7 @@ const Home = () => {
       });
     } else {
       gsap.to(confirmedRideRef.current, {
-        transform: "translateY(100%)",
+        transform: "translateY(150%)",
       });
     }
   }, [confirmedRide]);
@@ -86,7 +80,7 @@ const Home = () => {
       });
     } else {
       gsap.to(vehicleFoundRef.current, {
-        transform: "translateY(100%)",
+        transform: "translateY(150%)",
       });
     }
   }, [vehicleFound]);
@@ -103,7 +97,6 @@ const Home = () => {
     }
   }, [waitingForDriver]);
 
-  // Fetch suggestions from backend with debounce
   const fetchSuggestions = async (query) => {
     if (!query || query.trim().length < 2) {
       setSuggestions([]);
@@ -130,7 +123,6 @@ const Home = () => {
     }
   };
 
-  // Handle input change with debounce
   const handleInputChange = (field, value) => {
     if (field === "pickup") {
       setPick(value);
@@ -139,13 +131,9 @@ const Home = () => {
       setDest(value);
       setActiveField("destination");
     }
-
-    // Clear previous timeout
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
-
-    // Set new timeout
     const timer = setTimeout(() => {
       fetchSuggestions(value);
     }, 300);
@@ -153,7 +141,6 @@ const Home = () => {
     setTypingTimeout(timer);
   };
 
-  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (typingTimeout) {
@@ -161,6 +148,56 @@ const Home = () => {
       }
     };
   }, [typingTimeout]);
+
+  async function FindTrip() {
+    if (pick && dest) {
+      setPanel(false);
+      setVehiclespanel(true);
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
+          {
+            params: {
+              pickup: pick,
+              destination: dest,
+              vehicleType: "auto",
+            },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            },
+          }
+        );
+        setFare(response.data.fare);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert("Please enter both pickup and destination locations.");
+    }
+  }
+
+  async function createRide(vehicleType) {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/create`,
+        {
+          pickup: pick,
+          destination: dest,
+          vehicleType: vehicleType,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+      if (response.status === 201) {
+        console.log("Ride created successfully:", response.data);
+      }
+    } catch (error) {
+      console.error("Error creating ride:", error);
+    }
+  }
 
   return (
     <div className="h-screen relative overflow-hidden">
@@ -227,32 +264,8 @@ const Home = () => {
             <button
               className="border text-white font-semibold bg-gray-900 text-lg px-12 py-2 rounded-lg mt-5 w-full"
               type="button"
-              onClick={async (e) => {
-                e.preventDefault();
-                if (pick && dest) {
-                  setPanel(false);
-                  setVehiclespanel(true);
-                  try {
-                    const response = await axios.post(
-                      `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
-                      {
-                        params: {
-                          pickup: pick,
-                          destination: dest,
-                          vehicleType: "auto",
-                        },
-                        headers: {
-                          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                        },
-                      }
-                    );
-                    console.log(response.data);
-                  } catch (error) {
-                    console.error(error);
-                  }
-                } else {
-                  alert("Please enter both pickup and destination locations.");
-                }
+              onClick={() => {
+                FindTrip();
               }}
             >
               Find Trip
@@ -288,8 +301,11 @@ const Home = () => {
         <VehiclePanel
           setConfirmedRide={setConfirmedRide}
           setVehiclespanel={setVehiclespanel}
+          Fare={fare}
           pickup={pick}
           destination={dest}
+          vehicleType={setVehicleType}
+          setVehicleImg={setVehicleImg}
         />
       </div>
       <div
@@ -297,15 +313,29 @@ const Home = () => {
         className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg"
       >
         <ComfirmedRide
+          fare={fare}
+          pick={pick}
+          dest={dest}
+          vehicleType={vehicleType}
+          vehicleImg={vehicleImg}
           setConfirmedRide={setConfirmedRide}
           setVehicleFound={setVehicleFound}
+          createRide={() => createRide(vehicleType)}
         />
       </div>
       <div
         ref={vehicleFoundRef}
         className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
       >
-        <LookingForDriver setVehicleFound={setVehicleFound} />
+        <LookingForDriver
+          fare={fare}
+          pick={pick}
+          dest={dest}
+          vehicleType={vehicleType}
+          vehicleImg={vehicleImg}
+          createRide={() => createRide(vehicleType)}
+          setVehicleFound={setVehicleFound}
+        />
       </div>
       <div
         ref={waitingForDriverRef}
