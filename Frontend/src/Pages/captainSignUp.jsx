@@ -43,19 +43,19 @@ const CaptainSignup = () => {
           localStorage.setItem("captainToken", response.data.token);
           localStorage.removeItem("userToken"); // Ensure only one is logged in
           toast.success("Captain signup successful!");
-          console.log("Signup successful! You can now login.");
+          console.log("[CaptainSignUp] Signup successful! You can now login.");
           navigate("/captain-home");
         } else {
           toast.error("Signup failed!");
           console.log(
-            "Signup failed: " + (response.data.message || "Unknown error")
+            "[CaptainSignUp] Signup failed: " + (response.data.message || "Unknown error")
           );
         }
       })
       .catch((error) => {
         toast.error("Signup failed! Please try again.");
-        console.error("Error during signup:", error);
-        console.log("An error occurred during signup. Please try again.");
+        console.error("[CaptainSignUp] Error during signup:", error);
+        console.log("[CaptainSignUp] An error occurred during signup. Please try again.");
       });
 
     setEmail("");

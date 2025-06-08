@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import axios from "axios";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import CaptainDetails from "../components/CaptainDetails";
@@ -11,16 +12,18 @@ import { useContext } from "react";
 import { CaptainDataContext } from "../Context/CaptainContext";
 
 const CaptainHome = () => {
-  const [ridePopupPanel, setRidePopupPanel] = useState(true);
+  const [ridePopupPanel, setRidePopupPanel] = useState(false);
   const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(false);
   const ridePopupPanelRef = useRef(null);
   const confirmRidePopupPanelRef = useRef(null);
+  const [ride, setRide] = useState(null);
 
   const { socket } = useContext(SocketContext);
   const { captain } = useContext(CaptainDataContext);
 
   useEffect(() => {
-    console.log(captain);
+    // Log captain info on join
+    console.log("[CaptainHome] Captain joining socket:", captain);
     socket.emit("join", {
       role: "captain",
       userId: captain._id,
@@ -45,8 +48,31 @@ const CaptainHome = () => {
   }, []);
 
   socket.on("new-ride", (data) => {
-    console.log("New ride request received:", data);
+    console.log("[CaptainHome] Received new-ride event:", data);
+    setRide(data);
+    setRidePopupPanel(true);
   });
+
+  async function confirmRide() {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/confirm-ride`,
+        {
+          rideId: ride._id,
+          captainId: captain._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("captainToken")}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("[CaptainHome] Error confirming ride:", error);
+    }
+    setRidePopupPanel(false);
+    setConfirmRidePopupPanel(true);
+  }
 
   useGSAP(
     function () {
@@ -108,8 +134,10 @@ const CaptainHome = () => {
         className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12"
       >
         <RidePopUp
+          ride={ride}
           setRidePopupPanel={setRidePopupPanel}
           setConfirmRidePopupPanel={setConfirmRidePopupPanel}
+          confirmRide={confirmRide}
         />
       </div>
       <div
@@ -117,6 +145,7 @@ const CaptainHome = () => {
         className="fixed w-full h-screen z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12"
       >
         <ConfirmRidePopUp
+          ride={ride}
           setConfirmRidePopupPanel={setConfirmRidePopupPanel}
           setRidePopupPanel={setRidePopupPanel}
         />

@@ -62,7 +62,7 @@ module.exports.getAddressCoordinates = async (address) => {
       throw new Error("No results found for the given address.");
     }
   } catch (error) {
-    console.error(`Geocoding error for address: ${address}`, error);
+    console.error(`[getAddressCoordinates] Geocoding error for address: ${address}`, error);
     throw new Error(
       `Address not found: "${address}". Please try a more specific location.`
     );
@@ -124,7 +124,7 @@ module.exports.getDistanceTime = async (origin, destination) => {
       },
     };
   } catch (error) {
-    console.error("Routing error:", {
+    console.error("[getDistanceTime] Routing error:", {
       origin: `${origin.lat},${origin.lon}`,
       destination: `${destination.lat},${destination.lon}`,
       error: error.message,
@@ -179,6 +179,7 @@ module.exports.autocompleteAddress = async (query) => {
       }))
       .sort((a, b) => b.importance - a.importance); // Sort by importance
   } catch (error) {
+    console.error("[autocompleteAddress] Autocomplete failed:", error.message);
     throw new Error(`Autocomplete failed: ${error.message}`);
   }
 };

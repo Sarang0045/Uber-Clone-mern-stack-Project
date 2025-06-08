@@ -11,7 +11,7 @@ module.exports.getCoordinates = async (req, res, next) => {
     const result = await mapServices.getAddressCoordinates(req.query.address);
     res.status(200).json(result);
   } catch (error) {
-    console.error("Geocoding error details:", {
+    console.error("[getCoordinates] Geocoding error details:", {
       address: req.query.address,
       error: error.message
     });
@@ -40,7 +40,7 @@ module.exports.getDistanceTime = async (req, res, next) => {
     const { origin, destination } = req.query;
     
     // Log addresses for debugging
-    console.log("Routing request:", { origin, destination });
+    console.log("[getDistanceTime] Routing request:", { origin, destination });
     
     // Get coordinates
     const [originCoords, destinationCoords] = await Promise.all([
@@ -48,7 +48,7 @@ module.exports.getDistanceTime = async (req, res, next) => {
       mapServices.getAddressCoordinates(destination)
     ]);
     
-    console.log("Resolved coordinates:", {
+    console.log("[getDistanceTime] Resolved coordinates:", {
       origin: originCoords,
       destination: destinationCoords
     });
@@ -61,7 +61,7 @@ module.exports.getDistanceTime = async (req, res, next) => {
     
     res.status(200).json(result);
   } catch (error) {
-    console.error("Full routing error:", {
+    console.error("[getDistanceTime] Full routing error:", {
       origin: req.query.origin,
       destination: req.query.destination,
       error: error.message,
@@ -87,7 +87,6 @@ module.exports.getDistanceTime = async (req, res, next) => {
   }
 };
 
-// Add to existing mapsController.js
 module.exports.getSuggestions = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -95,7 +94,6 @@ module.exports.getSuggestions = async (req, res, next) => {
   }
   
   try {
-    // Changed from req.query.query to req.query.input
     const { input } = req.query;
     
     if (!input || input.trim().length < 3) {
@@ -119,7 +117,7 @@ module.exports.getSuggestions = async (req, res, next) => {
     });
     
   } catch (error) {
-    console.error("Suggestions error:", {
+    console.error("[getSuggestions] Suggestions error:", {
       input: req.query.input,
       error: error.message
     });

@@ -32,14 +32,21 @@ const Home = () => {
   const [fare, setFare] = useState(0);
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleImg, setVehicleImg] = useState("");
+  const [ride, setRide] = useState(null);
 
-  const { sendMessage, onMessage } = useContext(SocketContext);
+  const { sendMessage, socket } = useContext(SocketContext);
   const { user } = useContext(UserDataContext);
 
   useEffect(() => {
     console.log(user);
     sendMessage("join", { role: "user", userId: user._id });
   }, [user]);
+
+  socket.on("ride-confirmed", (data) => {
+    setRide(data);
+    setVehicleFound(false);
+    setWaitingForDriver(true);
+  });
 
   useLayoutEffect(() => {
     if (panel) {
@@ -209,7 +216,6 @@ const Home = () => {
       console.error("Error creating ride:", error);
     }
   }
-
   return (
     <div className="h-screen relative overflow-hidden">
       <img
@@ -352,7 +358,10 @@ const Home = () => {
         ref={waitingForDriverRef}
         className="fixed w-full z-10 bottom-0 bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
       >
-        <WaitingForDriver setWaitingForDriver={setWaitingForDriver} />
+        <WaitingForDriver
+          ride={ride}
+          setWaitingForDriver={setWaitingForDriver}
+        />
       </div>
     </div>
   );

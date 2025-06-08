@@ -22,7 +22,7 @@ const Captainlogin = () => {
       .then((response) => {
         if (response.status === 200) {
           const data = response.data;
-          console.log("Captain logged in successfully:", data);
+          console.log("[CaptionLogin] Captain logged in successfully:", data);
           setCaptain(data.captain);
           localStorage.setItem("captainToken", data.token);
           localStorage.removeItem("userToken"); // Ensure only one is logged in
@@ -32,7 +32,7 @@ const Captainlogin = () => {
       })
       .catch((error) => {
         toast.error("Captain login failed! Please check your credentials.");
-        console.error("Error logging in captain:", error);
+        console.error("[CaptionLogin] Error logging in captain:", error);
       });
     setEmail("");
     setPassword("");

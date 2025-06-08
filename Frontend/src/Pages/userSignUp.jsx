@@ -27,8 +27,7 @@ const UserSignup = () => {
       .then((response) => {
         if (response.status === 201) {
           const data = response.data;
-          console.log("User created successfully:", data);
-          console.log(data.user);
+          console.log("[UserSignUp] User created successfully:", data);
           setUser(data.user);
           localStorage.setItem("userToken", data.token);
           localStorage.removeItem("captainToken"); // Ensure only one is logged in
@@ -38,7 +37,7 @@ const UserSignup = () => {
       })
       .catch((error) => {
         toast.error("Signup failed! Please try again.");
-        console.error("Error creating user:", error);
+        console.error("[UserSignUp] Error creating user:", error);
       });
 
     setEmail("");

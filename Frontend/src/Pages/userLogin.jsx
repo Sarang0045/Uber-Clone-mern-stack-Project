@@ -22,7 +22,7 @@ const UserLogin = () => {
       .then((response) => {
         if (response.status === 200) {
           const data = response.data;
-          console.log("User logged in successfully:", data);
+          console.log("[UserLogin] User logged in successfully:", data);
           setUser(data.user);
           localStorage.setItem("userToken", data.token);
           localStorage.removeItem("captainToken"); // Ensure only one is logged in
@@ -30,7 +30,7 @@ const UserLogin = () => {
           navigate("/home");
         } else {
           toast.error("Failed to login!");
-          console.error("Failed to login:", response.statusText);
+          console.error("[UserLogin] Failed to login:", response.statusText);
         }
       })
       .catch(() => {
