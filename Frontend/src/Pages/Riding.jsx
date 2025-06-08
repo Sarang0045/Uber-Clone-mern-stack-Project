@@ -1,9 +1,18 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Added useLocation
+import { useEffect, useContext } from "react";
+import { SocketContext } from "../context/SocketContext";
+import { useNavigate } from "react-router-dom";
 
 const Riding = () => {
   const location = useLocation();
   const ride = location.state?.ride;
+  const { socket } = useContext(SocketContext);
+  const navigate = useNavigate();
+
+  socket.on("ride-ended", () => {
+    navigate("/home");
+  });
 
   return (
     <div className="min-h-screen overflow-y-auto">
@@ -57,9 +66,7 @@ const Riding = () => {
                     return words.slice(0, 2).join(" ");
                   })()}
                 </h3>
-                <p className="text-sm -mt-1 text-gray-600">
-                  {ride?.pickup}
-                </p>
+                <p className="text-sm -mt-1 text-gray-600">{ride?.pickup}</p>
               </div>
             </div>
             <div className="flex items-center gap-5 p-3">
