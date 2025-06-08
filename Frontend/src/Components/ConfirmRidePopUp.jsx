@@ -26,7 +26,7 @@ const ConfirmRidePopUp = (props) => {
     if (response.status === 200) {
       props.setConfirmRidePopupPanel(false);
       props.setRidePopupPanel(false);
-      navigate("/captain-riding", { state: { ride: props.ride } });
+      navigate("/captain-riding", { state: { ride: response.data } });
     }
   };
   return (
@@ -124,7 +124,7 @@ const ConfirmRidePopUp = (props) => {
             />
             <button
               type="submit"
-              className="w-full mt-5 text-lg flex justify-center bg-gray-900 text-white font-semibold p-3 rounded-lg"
+              className="w-full mt-5 text-lg flex justify-center bg-green-600 text-white font-semibold p-3 rounded-lg"
             >
               Confirm
             </button>

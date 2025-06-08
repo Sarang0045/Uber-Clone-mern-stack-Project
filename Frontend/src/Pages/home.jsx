@@ -54,7 +54,7 @@ const Home = () => {
   socket.on("ride-started", (data) => {
     console.log("Ride started:", data);
     setWaitingForDriver(false);
-    navigate("/riding");
+    navigate("/riding", { state: { ride: data } });
   });
 
   useLayoutEffect(() => {

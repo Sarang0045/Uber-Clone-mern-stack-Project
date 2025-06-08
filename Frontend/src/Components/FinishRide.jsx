@@ -2,6 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const FinishRide = (props) => {
+  const user = props.ride?.user?.fullname;
+  const address = props.ride?.pickup;
+  const distance = props.ride?.distance
+    ? `${Number(props.ride.distance).toFixed(2)} KM away`
+    : "Ride";
+
   return (
     <div>
       <h5
@@ -12,57 +18,75 @@ const FinishRide = (props) => {
       >
         <i className="text-3xl text-gray-200 ri-arrow-down-wide-line"></i>
       </h5>
-      <h3 className="text-2xl font-semibold mb-5">Finish this Ride</h3>
-      <div className="flex items-center justify-between p-4 border-2 border-yellow-400 rounded-lg mt-4">
-        <div className="flex items-center gap-3 ">
-          <img
-            className="h-12 rounded-full object-cover w-12"
-            src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg"
-            alt=""
-          />
-          <h2 className="text-lg font-medium">Harshi Pateliya</h2>
+      {/* Distance and user/address */}
+      <div className="flex flex-col items-center justify-center bg-yellow-400 rounded-t-xl py-6 mb-4">
+        <div className="text-3xl font-bold mb-2">{distance}</div>
+        <div className="text-lg font-semibold">
+          {user?.firstname} <span className="lowercase">{user?.lastname}</span>
         </div>
-        <h5 className="text-lg font-semibold">2.2 KM</h5>
+        <div className="text-base text-gray-700">{address}</div>
       </div>
-      <div className="flex gap-2 justify-between flex-col items-center">
-        <div className="w-full mt-5">
-          <div className="flex items-center gap-5 p-3 border-b-2">
-            <i className="ri-map-pin-user-fill"></i>
-            <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya Talab, Bhopal
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-5 p-3 border-b-2">
-            <i className="text-lg ri-map-pin-2-fill"></i>
-            <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya Talab, Bhopal
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-5 p-3">
-            <i className="ri-currency-line"></i>
-            <div>
-              <h3 className="text-lg font-medium">₹193.20 </h3>
-              <p className="text-sm -mt-1 text-gray-600">Cash Cash</p>
-            </div>
+      {/* Divider */}
+      <div className="border-b border-gray-300 mb-4"></div>
+      {/* Fare and destination */}
+      <div className="flex flex-col gap-4 px-2">
+        <div className="flex items-center gap-3">
+          <i className="ri-map-pin-user-fill text-xl"></i>
+          <div>
+            <h3 className="text-lg font-medium">
+              {(() => {
+                if (!props.ride?.pickup) return "-";
+                const commaIdx = props.ride?.pickup.indexOf(",");
+                if (commaIdx !== -1) {
+                  return props.ride?.pickup.slice(0, commaIdx);
+                }
+                const words = props.ride?.pickup.trim().split(/\s+/);
+                return words.slice(0, 2).join(" ");
+              })()}
+            </h3>
+            <p className="text-sm -mt-1 text-gray-600">
+              {props.ride?.pickup}
+            </p>
           </div>
         </div>
-
-        <div className="mt-10 w-full">
-          <Link
-            to="/captain-home"
-            className="w-full mt-5 flex  text-lg justify-center bg-green-600 text-white font-semibold p-3 rounded-lg"
-          >
-            Finish Ride
-          </Link>
+        <div className="flex items-center gap-3">
+          <i className="ri-map-pin-2-fill text-xl"></i>
+          <div>
+            <h3 className="text-lg font-medium">
+              {(() => {
+                if (!props.ride?.destination) return "-";
+                const commaIdx = props.ride?.destination.indexOf(",");
+                if (commaIdx !== -1) {
+                  return props.ride?.destination.slice(0, commaIdx);
+                }
+                const words = props.ride?.destination.trim().split(/\s+/);
+                return words.slice(0, 2).join(" ");
+              })()}
+            </h3>
+            <p className="text-sm -mt-1 text-gray-600">
+              {props.ride?.destination}
+            </p>
+          </div>
         </div>
+        <div className="flex items-center gap-3">
+          <i className="ri-currency-line text-xl"></i>
+          <div>
+            <h3 className="text-lg font-medium">₹{props.ride?.fare}</h3>
+            <p className="text-sm -mt-1 text-gray-600">Cash</p>
+          </div>
+        </div>
+      </div>
+      {/* Finish Ride Button */}
+      <div className="mt-8 flex justify-center">
+        <Link
+          to="/captain-home"
+          className="w-2/3 text-lg flex justify-center bg-green-600 text-white font-semibold p-3 rounded-lg shadow-lg"
+        >
+          Finish Ride
+        </Link>
       </div>
     </div>
   );
 };
+
 export default FinishRide;

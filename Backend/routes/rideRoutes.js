@@ -26,7 +26,6 @@ router.post('/confirm-ride',
     rideController.confirmRide
 )
 
-
 router.get('/start-ride',
     authMiddleware.authenticateCaptain,
     query('rideId').isMongoId().withMessage('Invalid ride ID'),
@@ -34,4 +33,10 @@ router.get('/start-ride',
     rideController.startRide
 )
 
+router.post('/end-ride',
+    authMiddleware.authenticateCaptain,
+    body('rideId').isMongoId().withMessage('Invalid ride id'),
+    rideController.endRide
+)
+// .
 module.exports = router;
