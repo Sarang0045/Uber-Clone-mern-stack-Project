@@ -1,11 +1,33 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 const ConfirmRidePopUp = (props) => {
   const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
-  const submitHander = (e) => {
-    e.preventDetault();
+  const submitHander = async (e) => {
+    e.preventDefault();
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+      {
+        params: {
+          rideId: props.ride._id,
+          otp: otp,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("captainToken")}`,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      props.setConfirmRidePopupPanel(false);
+      props.setRidePopupPanel(false);
+      navigate("/captain-riding", { state: { ride: props.ride } });
+    }
   };
   return (
     <div>
@@ -100,14 +122,14 @@ const ConfirmRidePopUp = (props) => {
               className="bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3"
               placeholder="Enter OTP"
             />
-
-            <Link
-              to="/captain-riding"
+            <button
+              type="submit"
               className="w-full mt-5 text-lg flex justify-center bg-gray-900 text-white font-semibold p-3 rounded-lg"
             >
               Confirm
-            </Link>
+            </button>
             <button
+              type="button"
               onClick={() => {
                 props.setConfirmRidePopupPanel(false);
                 props.setRidePopupPanel(false);

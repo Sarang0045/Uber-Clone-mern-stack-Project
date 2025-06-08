@@ -10,6 +10,7 @@ import axios from "axios";
 import React, { useContext } from "react";
 import { SocketContext } from "../Context/SocketContext";
 import { UserDataContext } from "../Context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [pick, setPick] = useState("");
@@ -34,6 +35,8 @@ const Home = () => {
   const [vehicleImg, setVehicleImg] = useState("");
   const [ride, setRide] = useState(null);
 
+  const navigate = useNavigate();
+
   const { sendMessage, socket } = useContext(SocketContext);
   const { user } = useContext(UserDataContext);
 
@@ -46,6 +49,12 @@ const Home = () => {
     setRide(data);
     setVehicleFound(false);
     setWaitingForDriver(true);
+  });
+
+  socket.on("ride-started", (data) => {
+    console.log("Ride started:", data);
+    setWaitingForDriver(false);
+    navigate("/riding");
   });
 
   useLayoutEffect(() => {
