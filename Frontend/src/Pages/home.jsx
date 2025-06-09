@@ -43,7 +43,6 @@ const Home = () => {
   const { user } = useContext(UserDataContext);
 
   useEffect(() => {
-    console.log(user);
     sendMessage("join", { role: "user", userId: user._id });
   }, [user]);
 
@@ -54,7 +53,6 @@ const Home = () => {
   });
 
   socket.on("ride-started", (ride) => {
-    console.log("Ride started:", ride);
     setWaitingForDriver(false);
     navigate("/riding", { state: { ride, vehicleImg } });
   });
@@ -220,9 +218,6 @@ const Home = () => {
           },
         }
       );
-      if (response.status === 201) {
-        console.log("Ride created successfully:", response.data);
-      }
     } catch (error) {
       console.error("Error creating ride:", error);
     }

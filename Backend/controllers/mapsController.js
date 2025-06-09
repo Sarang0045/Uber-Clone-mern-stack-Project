@@ -39,19 +39,11 @@ module.exports.getDistanceTime = async (req, res, next) => {
   try {
     const { origin, destination } = req.query;
     
-    // Log addresses for debugging
-    console.log("[getDistanceTime] Routing request:", { origin, destination });
-    
     // Get coordinates
     const [originCoords, destinationCoords] = await Promise.all([
       mapServices.getAddressCoordinates(origin),
       mapServices.getAddressCoordinates(destination)
     ]);
-    
-    console.log("[getDistanceTime] Resolved coordinates:", {
-      origin: originCoords,
-      destination: destinationCoords
-    });
     
     // Get distance and time
     const result = await mapServices.getDistanceTime(

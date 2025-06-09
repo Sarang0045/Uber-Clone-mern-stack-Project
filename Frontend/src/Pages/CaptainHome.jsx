@@ -25,7 +25,6 @@ const CaptainHome = () => {
 
   useEffect(() => {
     // Log captain info on join
-    console.log("[CaptainHome] Captain joining socket:", captain);
     socket.emit("join", {
       role: "captain",
       userId: captain._id,
@@ -50,7 +49,6 @@ const CaptainHome = () => {
   }, []);
 
   socket.on("new-ride", (data) => {
-    console.log("[CaptainHome] Received new-ride event:", data);
     setRide(data);
     setRidePopupPanel(true);
   });
@@ -120,12 +118,6 @@ const CaptainHome = () => {
           src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
           alt=""
         />
-        <Link
-          to="/captain-home"
-          className=" h-10 w-10 bg-white flex items-center justify-center rounded-full"
-        >
-          <i className="text-lg font-medium ri-logout-box-r-line"></i>
-        </Link>
       </div>
       <div className="h-2/5 p-6">
         <CaptainDetails />

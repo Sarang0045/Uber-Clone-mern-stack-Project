@@ -29,7 +29,6 @@ module.exports.createRide = async (req, res) => {
       pickupCoordinates.lon,
       30
     );
-    console.log("Captains in radius:", captainsInRadius);
     populatedRide.otp = "";
     captainsInRadius.map(async (captain) => {
       sendMessageToSocketId(captain.socketId, {
@@ -99,8 +98,6 @@ module.exports.startRide = async (req, res) => {
       otp,
       captain: req.captain,
     });
-
-    console.log(ride);
 
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-started",
