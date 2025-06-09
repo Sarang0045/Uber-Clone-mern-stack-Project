@@ -1,534 +1,191 @@
-# User Registration API
+# Uber Clone Backend (Node.js, Express, MongoDB, Socket.IO)
 
-## Endpoint
+## 1. Project Overview
 
-`POST /users/register`
+This is the backend for an Uber-like ride-hailing application built with the MERN stack.  
+It provides RESTful APIs and real-time features for user registration, authentication, ride management, live driver tracking, and more.
 
-## Description
+**Technologies Used:**
+- Node.js & Express.js (server and routing)
+- MongoDB & Mongoose (database and ODM)
+- Socket.IO (real-time communication)
+- JWT (authentication)
+- OpenStreetMap, OSRM, MapLibre (maps, geocoding, routing)
+- Other utilities: bcrypt, dotenv, axios, etc.
 
-Registers a new user in the system.  
-Requires user details including full name, email, and password.
-
-## Request Body
-
-Send a JSON object with the following structure:
-
-```json
-{
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
-  "email": "johndoe@example.com",
-  "password": "yourpassword"
-}
-```
-
-### Field Requirements
-
-- `fullname.firstname` (string, required): Minimum 3 characters.
-- `fullname.lastname` (string, required): Minimum 3 characters.
-- `email` (string, required): Must be a valid email address.
-- `password` (string, required): Minimum 6 characters.
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 201         | User registered successfully. Returns user and token. |
-| 400         | Validation error or missing/invalid fields.      |
-| 500         | Internal server error.                           |
-
-### Example Success Response
-
-```json
-{
-  "user": {
-    "_id": "user_id_here",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
-    "email": "johndoe@example.com"
-    // ...other fields
-  },
-  "token": "jwt_token_here"
-}
-```
-
-### Example Error Response
-
-```json
-{
-  "errors": [
-    {
-      "msg": "First name must be at least 3 characters long",
-      "param": "fullname.firstname",
-      "location": "body"
-    }
-  ]
-}
+**Key Features:**
+- User and Captain (driver) registration & authentication
+- Secure JWT-based auth with token blacklisting on logout
+- Ride creation, fare calculation, and status management
+- Real-time location updates and ride status via Socket.IO
+- Geocoding and routing using open-source APIs
+- Modular, scalable codebase
 
 ---
 
-# User Login API
+## 2. Folder Structure Explanation
 
-## Endpoint
+| Folder/File      | Purpose                                                                 |
+|------------------|-------------------------------------------------------------------------|
+| `routes/`        | Express route definitions for users, captains, rides, maps, etc.        |
+| `controllers/`   | Request handlers for each route; business logic entry points            |
+| `models/`        | Mongoose schemas for User, Captain, Ride, etc.                          |
+| `services/`      | Business logic, helpers, and integrations (e.g., map, ride, user logic) |
+| `middlewares/`   | Express middleware (auth, validation, etc.)                             |
+| `socket.js`      | Socket.IO server setup and event handlers                               |
+| `db/`            | Database connection logic                                               |
+| `app.js`         | Express app setup (middleware, routes, etc.)                            |
+| `server.js`      | Entry point, creates HTTP server and attaches Socket.IO                 |
+| `.env`           | Environment variables                                                   |
 
-`POST /users/login`
+---
 
-## Description
+## 3. API Routes Documentation
 
-Authenticates a user and returns a JWT token if the credentials are valid.
+### **User Routes**
+| Method | Route                | Description                       |
+|--------|----------------------|-----------------------------------|
+| POST   | `/users/register`    | Register a new user               |
+| POST   | `/users/login`       | User login, returns JWT           |
+| GET    | `/users/profile`     | Get authenticated user's profile  |
+| GET    | `/users/logout`      | Logout user (blacklist token)     |
 
-## Request Body
+### **Captain (Driver) Routes**
+| Method | Route                 | Description                        |
+|--------|-----------------------|------------------------------------|
+| POST   | `/captains/register`  | Register a new captain/driver      |
+| POST   | `/captains/login`     | Captain login, returns JWT         |
+| GET    | `/captains/profile`   | Get authenticated captain profile  |
+| GET    | `/captains/logout`    | Logout captain (blacklist token)   |
 
-Send a JSON object with the following structure:
+### **Ride Routes**
+| Method | Route                  | Description                                 |
+|--------|------------------------|---------------------------------------------|
+| POST   | `/rides/create`        | Create a new ride (user)                    |
+| GET    | `/rides/get-fare`      | Get fare estimate for a ride                |
+| POST   | `/rides/confirm-ride`  | Captain accepts a ride                      |
+| GET    | `/rides/start-ride`    | Captain starts a ride (with OTP)            |
+| POST   | `/rides/end-ride`      | Captain ends a ride                         |
 
-```json
-{
-  "email": "johndoe@example.com",
-  "password": "yourpassword"
-}
-```
+### **Map & Location Routes**
+| Method | Route                       | Description                                 |
+|--------|-----------------------------|---------------------------------------------|
+| GET    | `/maps/get-coordinates`     | Geocode address to coordinates              |
+| GET    | `/maps/get-distance-time`   | Get driving distance/time between addresses |
+| GET    | `/maps/get-suggestions`     | Address autocomplete suggestions            |
 
-### Field Requirements
+---
 
-- `email` (string, required): Must be a valid email address.
-- `password` (string, required): Minimum 6 characters.
+## 4. Controllers and Services
 
-## Responses
+- **Controllers**:  
+  - `userController.js`, `captainController.js`, `rideController.js`, `mapsController.js`
+  - Handle HTTP requests, validation, and responses.
+- **Services**:  
+  - `userServices.js`, `captainServices.js`, `rideService.js`, `mapServices.js`
+  - Contain business logic, database queries, and external API calls.
+- **Separation**:  
+  - Controllers call services for all business/data logic, keeping controllers clean.
 
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Login successful. Returns user and token.        |
-| 400         | Validation error or missing/invalid fields.      |
-| 401         | Invalid email or password.                       |
-| 500         | Internal server error.                           |
+---
 
-### Example Success Response
+## 5. Models (Mongoose Schemas)
 
-```json
-{
-  "user": {
-    "_id": "user_id_here",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
-    "email": "johndoe@example.com"
-    // ...other fields
-  },
-  "token": "jwt_token_here"
-}
-```
+- **User**: Stores user info, email, password (hashed), socketId, etc.
+- **Captain**: Stores driver info, vehicle details, status, location, socketId, etc.
+- **Ride**: Stores ride details (user, captain, pickup, destination, fare, status, OTP, etc.)
+- **BlackListToken**: Stores blacklisted JWTs for logout security.
 
-### Example Error Response
+---
 
-```json
-{
-  "error": "Invalid email or password"
-}
+## 6. Socket.IO Integration
+
+- **Purpose**: Real-time updates for ride status, driver location, and notifications.
+- **Events**:
+  - `join`: User or captain joins with their socket ID.
+  - `update-location-captain`: Captain sends live location updates.
+  - `new-ride`: Server notifies captains of new ride requests.
+  - `ride-confirmed`, `ride-started`, `ride-ended`: Server notifies users of ride status changes.
+
+**Example:**
+```js
+io.on("connection", (socket) => {
+  socket.on("join", ({ userId, role }) => { /* ... */ });
+  socket.on("update-location-captain", ({ userId, location }) => { /* ... */ });
+  // ...other events
+});
 ```
 
 ---
 
-# User Profile API
+## 7. Server Setup
 
-## Endpoint
-
-`GET /users/profile`
-
-## Description
-
-Returns the authenticated user's profile information.  
-Requires a valid JWT token (sent via cookie or `Authorization` header).
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Returns the user's profile.                      |
-| 401         | Unauthorized or missing/invalid token.           |
-
-### Example Success Response
-
-```json
-{
-  "_id": "user_id_here",
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
-  "email": "johndoe@example.com"
-  // ...other fields
-}
-```
+- **Express app** is created in `app.js` (middleware, routes, error handling).
+- **HTTP server** is created in `server.js` and passed to Socket.IO.
+- **CORS**, JSON parsing, cookie parsing, and environment config are enabled.
+- **Port** is set via `.env` (`PORT`) or defaults to 3000/4000.
 
 ---
 
-# User Logout API
+## 8. Authentication
 
-## Endpoint
-
-`GET /users/logout`
-
-## Description
-
-Logs out the authenticated user by blacklisting the current JWT token and clearing the token cookie.  
-Requires a valid JWT token (sent via cookie or `Authorization` header).
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Logout successful. Token is blacklisted.         |
-| 401         | Unauthorized or missing/invalid token.           |
-
-### Example Success Response
-
-```json
-{
-  "message": "Logged out successfully"
-}
-```
+- **JWT tokens** are issued on login and required for protected routes.
+- **Middleware** (`OuthMiddleware.js`) checks for valid tokens and blacklists.
+- **Logout**: Blacklists the token and clears the cookie.
 
 ---
 
-# Captain Registration API
+## 9. Environment Variables (.env)
 
-## Endpoint
-
-`POST /captains/register`
-
-## Description
-
-Registers a new captain (driver) in the system.  
-Requires captain details including full name, email, password, and vehicle information.
-
-## Request Body
-
-Send a JSON object with the following structure:
-
-```json
-{
-  "fullname": {
-    "firstname": "Jane",
-    "lastname": "Smith"
-  },
-  "email": "janesmith@example.com",
-  "password": "yourpassword",
-  "vehicle": {
-    "color": "Red",
-    "plate": "XYZ1234",
-    "type": "car",
-    "capacity": 4
-  }
-}
-```
-
-### Field Requirements
-
-- `fullname.firstname` (string, required): Minimum 3 characters.
-- `fullname.lastname` (string, optional): Minimum 3 characters if provided.
-- `email` (string, required): Must be a valid email address.
-- `password` (string, required): Minimum 6 characters.
-- `vehicle.color` (string, required): Minimum 3 characters.
-- `vehicle.plate` (string, required): Minimum 3 characters.
-- `vehicle.type` (string, required): Must be one of `car`, `bike`, or `auto`.
-- `vehicle.capacity` (integer, required): Minimum 1.
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 201         | Captain registered successfully. Returns captain and token. |
-| 400         | Validation error or missing/invalid fields.      |
-| 500         | Internal server error.                           |
-
-### Example Success Response
-
-```json
-{
-  "token": "jwt_token_here",
-  "captain": {
-    "_id": "captain_id_here",
-    "fullname": {
-      "firstname": "Jane",
-      "lastname": "Smith"
-    },
-    "email": "janesmith@example.com",
-    "vehicle": {
-      "color": "Red",
-      "plate": "XYZ1234",
-      "type": "car",
-      "capacity": 4
-    }
-    // ...other fields
-  }
-}
-```
-
-### Example Error Response
-
-```json
-{
-  "errors": [
-    {
-      "msg": "First name must be at least 3 characters long",
-      "param": "fullname.firstname",
-      "location": "body"
-    }
-  ]
-}
+| Variable         | Description                                 |
+|------------------|---------------------------------------------|
+| `PORT`           | Server port (default: 4000)                 |
+| `MONGO_URI`      | MongoDB connection string                   |
+| `JWT_SECRET`     | Secret key for JWT signing                  |
+| `OPENROUTE_API_KEY` | (Optional) API key for routing services  |
+| `NOMINATIM_BASE_URL` | (Optional) Base URL for geocoding API   |
 
 ---
 
-# Captain Login API
+## 10. Running the Project Locally
 
-## Endpoint
-
-`POST /captains/login`
-
-## Description
-
-Authenticates a captain (driver) and returns a JWT token if the credentials are valid.
-
-## Request Body
-
-```json
-{
-  "email": "janesmith@example.com",
-  "password": "yourpassword"
-}
-```
-
-### Field Requirements
-
-- `email` (string, required): Must be a valid email address.
-- `password` (string, required): Minimum 6 characters.
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Login successful. Returns captain and token.      |
-| 400         | Validation error or missing/invalid fields.      |
-| 401         | Invalid email or password.                       |
-| 500         | Internal server error.                           |
-
-### Example Success Response
-
-```json
-{
-  "captain": {
-    "_id": "captain_id_here",
-    "fullname": {
-      "firstname": "Jane",
-      "lastname": "Smith"
-    },
-    "email": "janesmith@example.com",
-    "vehicle": {
-      "color": "Red",
-      "plate": "XYZ1234",
-      "type": "car",
-      "capacity": 4
-    }
-    // ...other fields
-  },
-  "token": "jwt_token_here"
-}
-```
-
-### Example Error Response
-
-```json
-{
-  "error": "Invalid email or password"
-}
-```
-
----
-
-# Captain Profile API
-
-## Endpoint
-
-`GET /captains/profile`
-
-## Description
-
-Returns the authenticated captain's profile information.  
-Requires a valid JWT token (sent via cookie or `Authorization` header).
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Returns the captain's profile.                   |
-| 401         | Unauthorized or missing/invalid token.           |
-
-### Example Success Response
-
-```json
-{
-  "captain": {
-    "_id": "captain_id_here",
-    "fullname": {
-      "firstname": "Jane",
-      "lastname": "Smith"
-    },
-    "email": "janesmith@example.com",
-    "vehicle": {
-      "color": "Red",
-      "plate": "XYZ1234",
-      "type": "car",
-      "capacity": 4
-    }
-    // ...other fields
-  }
-}
-```
-
----
-
-# Captain Logout API
-
-## Endpoint
-
-`GET /captains/logout`
-
-## Description
-
-Logs out the authenticated captain by blacklisting the current JWT token and clearing the token cookie.  
-Requires a valid JWT token (sent via cookie or `Authorization` header).
-
-## Responses
-
-| Status Code | Description                                      |
-|-------------|--------------------------------------------------|
-| 200         | Logout successful. Token is blacklisted.         |
-| 401         | Unauthorized or missing/invalid token.           |
-
-### Example Success Response
-
-```json
-{
-  "message": "Logged out successfully"
-}
-```
-
----
-
-# Map & Routing Features
-
-## Overview
-
-This project provides map-based features for address geocoding and route calculation, enabling users to:
-
-- Convert a textual address into geographic coordinates (latitude and longitude).
-- Calculate driving distance and estimated travel time between two locations.
-
-## Technologies & Open Source Services Used
-
-- **MapLibre GL JS**:  
-  Used on the frontend for rendering interactive maps. MapLibre is an open-source mapping library compatible with Mapbox GL JS v1.
-
-- **OpenStreetMap (OSM) Nominatim API**:  
-  Used for geocoding (converting addresses to coordinates).  
-  [Nominatim](https://nominatim.openstreetmap.org/) is a free, open-source geocoding service based on OpenStreetMap data.
-
-- **OSRM (Open Source Routing Machine)**:  
-  Used for calculating driving routes, distances, and estimated times between coordinates.  
-  [OSRM](http://project-osrm.org/) is a high-performance open-source routing engine for road networks.
-
-- **Axios**:  
-  Used in the backend to make HTTP requests to Nominatim and OSRM APIs.
-
-## API Endpoints
-
-### Get Coordinates
-
-`GET /maps/get-coordinates?address=ADDRESS_STRING`
-
-- Returns the latitude and longitude for a given address.
-- Requires user authentication.
-
-### Get Distance and Time
-
-`GET /maps/get-distance-time?origin=ORIGIN_ADDRESS&destination=DESTINATION_ADDRESS`
-
-- Returns the driving distance and estimated duration between two addresses.
-- Requires user authentication.
-
-## Example Workflow
-
-1. **Geocoding**:  
-   The backend receives an address, queries the Nominatim API, and returns the coordinates.
-
-2. **Routing**:  
-   The backend receives two addresses, converts both to coordinates, then queries the OSRM API to get the driving route, distance, and estimated time.
-
-## Why Open Source?
-
-- All map and routing features are built using open-source technologies and public APIs, ensuring no vendor lock-in and no usage fees for basic features.
-
----
-
-# Ride API
-
-## Create Ride
-
-**Endpoint:**  
-`POST /rides/create`
-
-**Authentication:**  
-Bearer token required (user must be authenticated)
-
-**Request Body:**
-```json
-{
-  "pickup": "Pickup address as string (min 5 chars)",
-  "destination": "Destination address as string (min 5 chars)",
-  "vehicleType": "auto | car | moto"
-}
-```
-
-**Validation:**
-- `pickup`: string, required, min 5 characters
-- `destination`: string, required, min 5 characters
-- `vehicleType`: one of `auto`, `car`, `moto`
-
-**Response (201 Created):**
-```json
-{
-  "message": "Ride created successfully",
-  "ride": {
-    "id": "ride_id",
-    "user": "user_id",
-    "pickup": "Pickup address",
-    "destination": "Destination address",
-    "fare": 123,
-    "otp": "123456", // Only in development
-    "distance": "12.34 km",
-    "duration": "25 min",
-    "status": "pending"
-  }
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: Validation errors or address not found
-- `500 Internal Server Error`: Unexpected server error
-
-**Example Request:**
 ```bash
-curl -X POST https://your-api-url/rides/create \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "pickup": "MG Road, Bengaluru",
-    "destination": "Indiranagar, Bengaluru",
-    "vehicleType": "auto"
-  }'
+# 1. Install dependencies
+npm install
+
+# 2. Create a .env file (see above for required variables)
+
+# 3. Start the server
+node server.js
+# or, if you use nodemon:
+# npx nodemon server.js
 ```
+
+---
+
+## 11. Dependencies
+
+| Package         | Purpose                                      |
+|-----------------|----------------------------------------------|
+| express         | Web server and routing                       |
+| mongoose        | MongoDB ODM                                  |
+| socket.io       | Real-time communication                      |
+| bcrypt/bcryptjs | Password hashing                             |
+| jsonwebtoken    | JWT authentication                           |
+| cors            | Cross-origin resource sharing                |
+| dotenv          | Environment variable management              |
+| axios           | HTTP requests to external APIs               |
+| express-validator | Request validation                         |
+| cookie-parser   | Cookie parsing for auth                      |
+
+---
+
+## 12. Contributing & License Info
+
+- **Contributions**: PRs and issues are welcome! Please fork and submit your changes.
+- **License**: MIT or your preferred license.
+
+---
+
+**Questions?**  
+Open an issue or contact the maintainer.

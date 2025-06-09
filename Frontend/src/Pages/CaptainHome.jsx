@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import CaptainDetails from "../components/CaptainDetails";
+import CaptainDetails from "../Components/CaptainDetails";
 import RidePopUp from "../components/RidePopUp";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
