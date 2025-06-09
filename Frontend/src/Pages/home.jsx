@@ -227,18 +227,21 @@ const Home = () => {
     }
   }
   return (
-    <div className="h-screen relative overflow-hidden">
+    <div className="fixed inset-0 flex flex-col bg-gray-50 z-10">
+      {/* Uber logo */}
       <img
-        className="w-16 absolute left-5 top-5"
+        className="w-16 absolute left-5 top-5 z-20"
         src="https://upload.wikimedia.org/wikipedia/commons/5/58/Uber_logo_2018.svg"
         alt="uber"
       />
-      <div className="h-screen w-screen">
-        {/* Replace static map image with LiveTracking component */}
+      {/* Map background */}
+      <div className="absolute inset-0 z-0">
         <LiveTracking />
       </div>
-      <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
-        <div className="h-[30%] bg-white p-5 relative">
+      {/* Main content overlays */}
+      <div className="flex flex-col justify-end h-full absolute top-0 left-0 w-full z-10 pointer-events-none">
+        {/* Trip search panel */}
+        <div className="h-[30vh] min-h-[200px] bg-white p-5 relative pointer-events-auto">
           <h5
             onClick={() => {
               setPanel(false);
@@ -249,9 +252,9 @@ const Home = () => {
           >
             <i className="ri-close-line"></i>
           </h5>
-          <h4 className="text-2xl font-bold">Find a Trip</h4>
+          <h4 className="text-2xl font-bold mb-2 text-center">Find a Trip</h4>
           <form>
-            <div className="relative mt-5">
+            <div className="relative mt-3">
               <i className="ri-map-pin-fill text-2xl absolute left-3 top-1 text-gray-500"></i>
               <input
                 className="bg-[#eee] px-12 py-2 text-lg rounded-lg w-full"
@@ -296,8 +299,11 @@ const Home = () => {
             </button>
           </form>
         </div>
-
-        <div ref={panelRef} className="h-0 bg-white overflow-y-auto">
+        {/* Location search suggestions panel */}
+        <div
+          ref={panelRef}
+          className="h-0 bg-white rounded-t-3xl pointer-events-auto"
+        >
           <LocationSearchPanel
             setPanel={setPanel}
             panel={panel}
@@ -317,10 +323,10 @@ const Home = () => {
           />
         </div>
       </div>
-
+      {/* Vehicle selection, confirmation, and waiting overlays */}
       <div
         ref={vehiclepanelRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg"
+        className="fixed w-full z-20 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg pointer-events-auto"
       >
         <VehiclePanel
           setConfirmedRide={setConfirmedRide}
@@ -334,7 +340,7 @@ const Home = () => {
       </div>
       <div
         ref={confirmedRideRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg"
+        className="fixed w-full z-20 bottom-0 translate-y-full bg-white px-3 py-12 rounded-t-3xl shadow-lg pointer-events-auto"
       >
         <ComfirmedRide
           fare={fare}
@@ -349,7 +355,7 @@ const Home = () => {
       </div>
       <div
         ref={vehicleFoundRef}
-        className="fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
+        className="fixed w-full z-20 bottom-0 translate-y-full bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg pointer-events-auto"
       >
         <LookingForDriver
           fare={fare}
@@ -363,7 +369,7 @@ const Home = () => {
       </div>
       <div
         ref={waitingForDriverRef}
-        className="fixed w-full z-10 bottom-0 bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg"
+        className="fixed w-full z-20 bottom-0 bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-lg pointer-events-auto"
       >
         <WaitingForDriver
           ride={ride}

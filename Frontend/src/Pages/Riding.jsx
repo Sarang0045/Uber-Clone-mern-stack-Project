@@ -67,20 +67,20 @@ const Riding = () => {
         </div>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-4">
-            <i className="ri-map-pin-2-fill text-blue-600 text-xl"></i>
+            <i className="ri-map-pin-2-fill  text-xl"></i>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
                 {(() => {
-                  if (!ride?.pickup) return "-";
-                  const commaIdx = ride.pickup.indexOf(",");
+                  if (!ride?.destination) return "-";
+                  const commaIdx = ride.destination.indexOf(",");
                   if (commaIdx !== -1) {
-                    return ride.pickup.slice(0, commaIdx);
+                    return ride.destination.slice(0, commaIdx);
                   }
-                  const words = ride.pickup.trim().split(/\s+/);
+                  const words = ride.destination.trim().split(/\s+/);
                   return words.slice(0, 2).join(" ");
                 })()}
               </h3>
-              <p className="text-sm text-gray-500">{ride?.pickup}</p>
+              <p className="text-sm text-gray-500">{ride?.destination}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">

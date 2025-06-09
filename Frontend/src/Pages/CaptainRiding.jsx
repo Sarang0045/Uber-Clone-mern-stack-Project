@@ -57,32 +57,16 @@ const CaptainRiding = () => {
           <div className="flex items-center gap-4 mb-2">
             <img
               className="h-14 w-14 rounded-full object-cover border-2 border-yellow-400"
-              src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFCzxivJXCZk0Kk8HsHujTO3Olx0ngytPrWw&s"
               alt="user"
             />
             <div>
               <div className="text-xl font-bold">
-                {ride?.user?.fullname?.firstname} {ride?.user?.fullname?.lastname}
+                {ride?.user?.fullname?.firstname}{" "}
+                {ride?.user?.fullname?.lastname}
               </div>
               <div className="text-gray-700 text-base">
-                {ride?.pickup}
-              </div>
-            </div>
-          </div>
-          <div className="text-lg font-semibold text-yellow-700">
-            {ride?.distance
-              ? `${Number(ride.distance).toFixed(2)} KM away`
-              : "Ride"}
-          </div>
-        </div>
-        {/* Divider */}
-        <div className="w-full border-b border-gray-200 mb-4"></div>
-        {/* Ride Details */}
-        <div className="w-full flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <i className="ri-map-pin-user-fill text-xl text-gray-700"></i>
-            <div>
-              <div className="text-base font-medium">
+                <i className="ri-map-pin-user-fill text-sm"></i>{" "}
                 {(() => {
                   if (!ride?.pickup) return "-";
                   const commaIdx = ride.pickup.indexOf(",");
@@ -93,13 +77,21 @@ const CaptainRiding = () => {
                   return words.slice(0, 2).join(" ");
                 })()}
               </div>
-              <div className="text-xs text-gray-500">{ride?.pickup}</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <i className="ri-map-pin-2-fill text-xl text-gray-700"></i>
+          <div className="text-lg font-semibold text-yellow-700">
+            {ride?.distance
+              ? `${Number(ride.distance).toFixed(2)} KM away`
+              : "Ride"}
+          </div>
+        </div>
+        {/* Divider */}
+        {/* Ride Details */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-4">
+            <i className="ri-map-pin-2-fill  text-xl"></i>
             <div>
-              <div className="text-base font-medium">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {(() => {
                   if (!ride?.destination) return "-";
                   const commaIdx = ride.destination.indexOf(",");
@@ -109,26 +101,29 @@ const CaptainRiding = () => {
                   const words = ride.destination.trim().split(/\s+/);
                   return words.slice(0, 2).join(" ");
                 })()}
+              </h3>
+              <p className="text-sm text-gray-500">{ride?.destination}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <i className="ri-currency-line text-yellow-600 text-xl"></i>
+            <div className="flex justify-between w-full">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  ₹{ride?.fare}
+                </h3>
+                <p className="text-sm text-gray-500">Cash</p>
               </div>
-              <div className="text-xs text-gray-500">{ride?.destination}</div>
+              <div>
+                <button
+                  onClick={() => setFinishRidePanel(true)}
+                  className="w-full bg-green-600 hover:bg-green-500 text-white font-semibold p-2 rounded-lg text-lg shadow transition"
+                >
+                  Complete Ride
+                </button>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <i className="ri-currency-line text-xl text-gray-700"></i>
-            <div>
-              <div className="text-base font-medium">₹{ride?.fare}</div>
-              <div className="text-xs text-gray-500">Cash</div>
-            </div>
-          </div>
-        </div>
-        {/* Complete Ride Button */}
-        <div className="w-full flex justify-center mt-6">
-          <button
-            className="bg-green-600 text-white font-bold px-10 py-3 rounded-lg text-lg shadow-lg w-2/3"
-            onClick={() => setFinishRidePanel(true)}
-          >
-            Complete Ride
-          </button>
         </div>
       </div>
       <div

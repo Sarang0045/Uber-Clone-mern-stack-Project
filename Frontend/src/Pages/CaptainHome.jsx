@@ -107,6 +107,9 @@ const CaptainHome = () => {
 
   return (
     <div className="h-screen">
+      <div className="h-3/5">
+        <LiveTracking />
+      </div>
       <div className="fixed p-6 top-0 flex items-center justify-between w-screen">
         <img
           className="w-16"
@@ -119,9 +122,6 @@ const CaptainHome = () => {
         >
           <i className="text-lg font-medium ri-logout-box-r-line"></i>
         </Link>
-      </div>
-      <div className="h-3/5">
-        <LiveTracking />
       </div>
       <div className="h-2/5 p-6">
         <CaptainDetails />
