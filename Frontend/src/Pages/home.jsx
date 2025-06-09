@@ -52,10 +52,10 @@ const Home = () => {
     setWaitingForDriver(true);
   });
 
-  socket.on("ride-started", (data) => {
-    console.log("Ride started:", data);
+  socket.on("ride-started", (ride) => {
+    console.log("Ride started:", ride);
     setWaitingForDriver(false);
-    navigate("/riding", { state: { ride: data } });
+    navigate("/riding", { state: { ride, vehicleImg } });
   });
 
   useLayoutEffect(() => {
