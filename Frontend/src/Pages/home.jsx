@@ -12,6 +12,7 @@ import { SocketContext } from "../Context/SocketContext";
 import { UserDataContext } from "../Context/UserContext";
 import { useNavigate } from "react-router-dom";
 import LiveTracking from "../Components/liveTracking";
+import LogoutButton from "../Components/LogoutButton";
 
 const Home = () => {
   const [pick, setPick] = useState("");
@@ -234,6 +235,8 @@ const Home = () => {
         src="https://upload.wikimedia.org/wikipedia/commons/5/58/Uber_logo_2018.svg"
         alt="uber"
       />
+      {/* Logout button (hide when any overlay is open) */}
+      {![panel, Vehiclespanel, confirmedRide, vehicleFound, waitingForDriver].some(Boolean) && <LogoutButton />}
       {/* Map background */}
       <div className="absolute inset-0 z-0">
         <LiveTracking />

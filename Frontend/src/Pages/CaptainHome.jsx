@@ -11,6 +11,7 @@ import { SocketContext } from "../Context/SocketContext";
 import { useContext } from "react";
 import { CaptainDataContext } from "../Context/CaptainContext";
 import LiveTracking from "../Components/liveTracking";
+import LogoutButton from "../Components/LogoutButton";
 
 const CaptainHome = () => {
   const [ridePopupPanel, setRidePopupPanel] = useState(false);
@@ -107,6 +108,9 @@ const CaptainHome = () => {
 
   return (
     <div className="h-screen">
+      {/* Logout button (hide when ridePopupPanel is open) */}
+      {!ridePopupPanel && <LogoutButton />}
+      {!confirmRidePopupPanel && <LogoutButton/>}
       <div className="h-3/5">
         <LiveTracking />
       </div>
