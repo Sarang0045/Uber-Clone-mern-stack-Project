@@ -49,6 +49,7 @@ cd Uber-Clone-mern-stack-Project
 ```bash
 cd server
 npm install
+npm start
 ```
 
 #### For the Frontend
@@ -56,6 +57,7 @@ npm install
 ```bash
 cd ../client
 npm install
+npm run dev
 ```
 
 ### 3. Set Up Environment Variables
