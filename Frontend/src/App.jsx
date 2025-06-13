@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import Start from "./Pages/Start";
 import UserLogin from "./Pages/userLogin";
-import UserSignup from "./Pages/UserSignUp";
+import UserSignup from "./Pages/userSignUp";
 import Captainlogin from "./Pages/CaptionLogin";
 import CaptainSignup from "./Pages/CaptainSignUp";
 import Home from "./Pages/home";
