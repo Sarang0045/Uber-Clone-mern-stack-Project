@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
 import Start from "./Pages/Start.jsx";
-import UserLogin from "./Pages/userLogin.jsx";
+import UserLogin from "./Pages/UserLogin.jsx";
 import UserSignUp from "./Pages/UserSignUp.jsx";
 import Captainlogin from "./Pages/CaptionLogin.jsx";
 import CaptainSignup from "./Pages/CaptainSignUp.jsx";
-import Home from "./Pages/home.jsx";
+import Home from "./Pages/Home.jsx";
 import UserContext from "./Context/UserContext.jsx";
 import UserProtectedWaper from "./Pages/UserProtectedWaper.jsx";
 import CaptainProtectWraper from "./Pages/CaptainProtectWraper.jsx";
