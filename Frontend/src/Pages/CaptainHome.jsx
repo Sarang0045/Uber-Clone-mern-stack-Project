@@ -7,9 +7,9 @@ import RidePopUp from "../components/RidePopUp";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ConfirmRidePopUp from "../components/ConfirmRidePopUp";
-import { SocketContext } from "../Context/SocketContext";
+import { SocketContext } from "../context/SocketContext";
 import { useContext } from "react";
-import { CaptainDataContext } from "../Context/CaptainContext";
+import { CaptainDataContext } from "../context/CaptainContext";
 import LiveTracking from "../Components/liveTracking";
 import LogoutButton from "../Components/LogoutButton";
 

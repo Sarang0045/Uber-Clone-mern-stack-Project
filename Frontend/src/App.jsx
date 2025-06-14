@@ -16,6 +16,8 @@ import CaptainRiding from "./pages/CaptainRiding";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "remixicon/fonts/remixicon.css";
+import UserContext from "./context/UserContext.jsx";
+import CaptainContext from "./context/CaptainContext.jsx";
 
 const App = () => {
   return (
