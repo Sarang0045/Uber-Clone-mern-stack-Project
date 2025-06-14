@@ -1,6 +1,6 @@
 import React, { useEffect, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { SocketContext } from "../context/SocketContext";
+import { SocketContext } from "../Context/SocketContext";
 import LiveTracking from "../Components/liveTracking";
 
 const Riding = () => {
